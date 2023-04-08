@@ -70,38 +70,36 @@ func Worker(mapf func(string, string) []KeyValue, reducef func(string, []string)
 	// uncomment to send the Example RPC to the coordinator.
 }
 
-// example function to show how to make an RPC call to the coordinator.
+//// example function to show how to make an RPC call to the coordinator.
+////
+//// the RPC argument and reply types are defined in rpc.go.
+//func CallExample() {
 //
-// the RPC argument and reply types are defined in rpc.go.
-func CallExample() {
-
-	// declare an argument structure.
-	args := ExampleArgs{}
-
-	// fill in the argument(s).
-	args.X = 99
-
-	// declare a reply structure.
-	reply := ExampleReply{}
-
-	// send the RPC request, wait for the reply.
-	// the "Coordinator.Example" tells the
-	// receiving server that we'd like to call
-	// the Example() method of struct Coordinator.
-	ok := call("Coordinator.Example", &args, &reply)
-
-	if ok {
-		// reply.Y should be 100.
-		fmt.Printf("reply.Y %v\n", reply.Y)
-	} else {
-		fmt.Printf("call failed!\n")
-	}
-}
+//	// declare an argument structure.
+//	args := ExampleArgs{}
+//
+//	// fill in the argument(s).
+//	args.X = 99
+//
+//	// declare a reply structure.
+//	reply := ExampleReply{}
+//
+//	// send the RPC request, wait for the reply.
+//	// the "Coordinator.Example" tells the
+//	// receiving server that we'd like to call
+//	// the Example() method of struct Coordinator.
+//	ok := call("Coordinator.Example", &args, &reply)
+//
+//	if ok {
+//		// reply.Y should be 100.
+//		fmt.Printf("reply.Y %v\n", reply.Y)
+//	} else {
+//		fmt.Printf("call failed!\n")
+//	}
+//}
 
 // GetTask 获取任务（需要知道是Map任务，还是Reduce）
 func GetTask() Task {
-
-	//wMu.Lock()
 	args := TaskArgs{}
 	reply := Task{}
 	ok := call("Coordinator.PollTask", &args, &reply)
@@ -112,7 +110,6 @@ func GetTask() Task {
 		fmt.Printf("call failed!\n")
 	}
 	return reply
-
 }
 
 func DoMapTask(mapf func(string, string) []KeyValue, response *Task) {
@@ -123,13 +120,13 @@ func DoMapTask(mapf func(string, string) []KeyValue, response *Task) {
 	if err != nil {
 		log.Fatalf("cannot open %v", filename)
 	}
-	// 通过io工具包获取conten,作为mapf的参数
+	// 通过io工具包获取content作为mapf的参数
 	content, err := ioutil.ReadAll(file)
 	if err != nil {
 		log.Fatalf("cannot read %v", filename)
 	}
 	file.Close()
-	// map返回一组KV结构体数组
+	// mapf返回一组KV结构体数组
 	intermediate = mapf(filename, string(content))
 
 	//initialize and loop over []KeyValue
@@ -152,7 +149,6 @@ func DoMapTask(mapf func(string, string) []KeyValue, response *Task) {
 		}
 		ofile.Close()
 	}
-
 }
 
 func DoReduceTask(reducef func(string, []string) string, response *Task) {
@@ -200,6 +196,7 @@ func shuffle(files []string) []KeyValue {
 		}
 		file.Close()
 	}
+	// 重写sort接口
 	sort.Sort(SortedKey(kva))
 	return kva
 }
@@ -227,7 +224,6 @@ func call(rpcname string, args interface{}, reply interface{}) bool {
 
 // callDone Call RPC to mark the task as completed
 func callDone(f *Task) Task {
-
 	args := f
 	reply := Task{}
 	ok := call("Coordinator.MarkFinished", &args, &reply)
@@ -238,5 +234,4 @@ func callDone(f *Task) Task {
 		fmt.Printf("call failed!\n")
 	}
 	return reply
-
 }
